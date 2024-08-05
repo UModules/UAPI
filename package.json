@@ -1,0 +1,14 @@
+{
+  "name": "com.useffarahmand.uapimodule",
+  "version": "1.0.0",
+  "displayName": "UAPIModule",
+  "description": "UAPIModule",
+  "unity": "2022.3",
+  "unityRelease": "0f1",
+  "author": {
+    "name": "Usef Farahmand"
+  },
+    "dependencies": {
+    "com.unity.nuget.newtonsoft-json": "3.2.1"
+  }
+}
