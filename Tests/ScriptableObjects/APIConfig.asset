@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c693ecc3fda8a3b4cb3777531ab9efcf, type: 3}
   m_Name: APIConfig
   m_EditorClassIdentifier: 
-  <BaseURLConfig>k__BackingField: {fileID: 11400000, guid: 731bd769c24ad4a47b0410904e855393, type: 2}
-  <Endpoint>k__BackingField: todos/1
-  <MethodType>k__BackingField: 0
-  <Headers>k__BackingField: {fileID: 11400000, guid: 0f12871756c5861498a58930e56a46ab, type: 2}
-  <NeedsAuthHeader>k__BackingField: 0
-  <Timeout>k__BackingField: 10000
-  <UseBearerPrefix>k__BackingField: 1
+  baseURLConfig: {fileID: 11400000, guid: 731bd769c24ad4a47b0410904e855393, type: 2}
+  endpoint: todos/1
+  methodType: 0
+  headers: {fileID: 11400000, guid: 0f12871756c5861498a58930e56a46ab, type: 2}
+  needsAuthHeader: 0
+  timeout: 10000
+  useBearerPrefix: 0
