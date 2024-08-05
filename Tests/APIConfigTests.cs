@@ -31,7 +31,7 @@ namespace UAPIModule.Tests
             apiConfig.GetType().GetProperty("UseBearerPrefix").SetValue(apiConfig, false);
 
             // Act
-            var configData = apiConfig.CreateConfigData();
+            var configData = apiConfig.Get();
 
             // Assert
             Assert.AreEqual(baseURLConfig, configData.BaseURLConfig);

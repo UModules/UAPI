@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace UAPIModule.Tools
 {
-    internal class SimpleLoadingHandler : MonoBehaviour, INetworkLoadingHandler
+    internal class SimpleLoadingHandler : MonoBehaviour, INetworkScreen
     {
         public void ShowLoading()
         {
@@ -16,11 +16,16 @@ namespace UAPIModule.Tools
             Debug.Log("Loading ended.");
             // Implement loading UI hide logic
         }
+
+        public void ShowMessage(NetworkResponse response)
+        {
+            Debug.Log(response.ToString());
+        }
     }
 
     public static class NetworkLoadingHandlerCreator
     {
-        public static INetworkLoadingHandler CreateAndGet() =>
+        public static INetworkScreen CreateAndGet() =>
             new GameObject("SimpleLoadingHandler").AddComponent<SimpleLoadingHandler>();
     }
 }
