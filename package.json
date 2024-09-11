@@ -5,11 +5,15 @@
   "description": "UAPIModule",
   "unity": "2022.3",
   "unityRelease": "0f1",
-  "author": {
-    "name": "Usef Farahmand"
-  },
+  "author": { "name": "Usef Farahmand", "url": "https://github.com/UsefFarahmand" },
   "dependencies": {
     "com.unity.nuget.newtonsoft-json": "3.2.1",
     "com.cysharp.unitask": "2.5.5"
-  }
+  },
+  "keywords": [
+    "UAPI",
+    "API",
+    "Unity",
+    "Networking"
+  ]
 }
