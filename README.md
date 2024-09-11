@@ -22,12 +22,43 @@ Alternatively, you can add the code directly to the project:
 
 ### Manifest File
 You can also install via git URL by adding this entry to your manifest.json:
+```
+com.umodules.uapi": "https://github.com/UModules/UAPI.git#upm
+```
 
-`"com.umodules.uapi": "https://github.com/UModules/UAPI.git#upm"`
+### Step 1: Install UniTask
+UAPI depends on UniTask, which needs to be installed before adding UAPI. Follow these steps:
+1. Open Unity and go to Window -> Package Manager.
+2. Press the + button and select Add package from git URL....
+3. Enter the following URL and press Add:
+```
+https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask
+```
+
+### Step 2: Install UAPI
+**Option 1:** Install via Git URL
+1. After installing UniTask, open Window -> Package Manager in Unity.
+2. Press the + button and choose Add package from git URL....
+3. Enter the following URL to install UAPI:
+```
+https://github.com/UModules/UAPI.gitupm
+```
+
+**Option 2:** Install via Manifest File
+Alternatively, you can install UAPI by editing your manifest.json file located in the Packages folder of your Unity project.
+Add the following line to your dependencies:
+```
+"com.umodules.uapi": "https://github.com/UModules/UAPI.git#upm"
+```
+
+**Option 3:** Manual Installation
+1. Clone the UAPI repo or download the latest release from GitHub.
+2. Add the UAPI folder to your Unity project manually or import the .unitypackage file.
 
 # Usage
 ### Sample Usage
 This example demonstrates how to create an API manager and send a request:
+```C#
 namespace UAPIModule.Tests
 {
     public class APIManager : RequestSender<string>
@@ -62,6 +93,7 @@ namespace UAPIModule.Tests
         }
     }
 }
+```
 
 # Documentation
 For detailed documentation, please refer to the [UAPI Documentation](https://github.com/UModules/UAPI/wiki).
