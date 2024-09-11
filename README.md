@@ -1,6 +1,6 @@
 # UAPI
 # Description
-UAPI is a C# library developed by UModules aimed at simplifying API development and integration. It provides a set of tools and utilities to streamline the process of creating, managing, and consuming APIs, making it easier for developers to build robust and scalable applications.
+UAPI is a C# library developed by [Usef Farahmand](https://github.com/UsefFarahmand) aimed at simplifying API development and integration. It provides a set of tools and utilities to streamline the process of creating, managing, and consuming APIs, making it easier for developers to build robust and scalable applications.
 
 # Features
 * **Easy Integration:** Simplifies the integration of APIs into your applications.
@@ -10,7 +10,7 @@ UAPI is a C# library developed by UModules aimed at simplifying API development 
 
 ## Installation
 ### Step 1: Install UniTask
-UAPI depends on UniTask, which needs to be installed before adding UAPI. Follow these steps:
+UAPI depends on `UniTask`, which needs to be installed before adding `UAPI`. Follow these steps:
 1. Open Unity and go to Window -> Package Manager.
 2. Press the `+` button and select **Add package from git URL...**
 3. Enter the following URL and press **Add**:
@@ -28,7 +28,7 @@ https://github.com/UModules/UAPI.gitupm
 ```
 
 **Option 2:** Install via Manifest File
-Alternatively, you can install UAPI by editing your manifest.json file located in the Packages folder of your Unity project.
+Alternatively, you can install `UAPI` by editing your `manifest.json` file located in the Packages folder of your Unity project.
 Add the following line to your dependencies:
 ```
 "com.umodules.uapi": "https://github.com/UModules/UAPI.git#upm"
