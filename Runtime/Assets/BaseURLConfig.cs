@@ -6,5 +6,10 @@ namespace UAPIModule.Assets
     public class BaseURLConfig : ScriptableObject
     {
         [field: SerializeField] public string BaseURL { get; private set; }
+
+        public void SetBaseURL(string url)
+        {
+            BaseURL = url;
+        }
     }
 }

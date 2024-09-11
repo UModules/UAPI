@@ -6,7 +6,6 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using UAPIModule.Abstraction;
-using UAPIModule.Assets;
 using UAPIModule.SharedTypes;
 using UAPIModule.Tools;
 using UnityEngine;
