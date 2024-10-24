@@ -1,111 +1,65 @@
-# UAPI
-# Description
+# UAPI 🚀
 UAPI is a C# library developed by [Usef Farahmand](https://github.com/UsefFarahmand) aimed at simplifying API development and integration. It provides a set of tools and utilities to streamline the process of creating, managing, and consuming APIs, making it easier for developers to build robust and scalable applications.
 
-# Features
+✨ If you prefer using Unity's `Coroutine` system for asynchronous operations, we also offer a version of this package that integrates with Coroutines. You can find it [here](https://github.com/UModules/UAPI-Coroutine).
+
+# Features 🌟
 * **Easy Integration:** Simplifies the integration of APIs into your applications.
 * **Comprehensive Documentation:** Detailed documentation to help you get started quickly.
 * **Modular Architecture:** Highly modular design allows for easy customization and extension.
 * **Robust Testing:** Includes a suite of tests to ensure reliability and stability.
 
-## Installation
-### Step 1: Install UniTask
+## Installation 🛠️
+### Step 1: Install `UniTask` 📦
 UAPI depends on `UniTask`, which needs to be installed before adding `UAPI`. Follow these steps:
 1. Open Unity and go to Window -> Package Manager.
 2. Press the `+` button and select **Add package from git URL...**
-3. Enter the following URL and press **Add**:
-```
-https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask
-```
+3. Enter `https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask` and press **Add**.
 
-### Step 2: Install UAPI
-**Option 1:** Install via Git URL
+### Step 2: Install `UAPI`
+### Git URL 🌐
 1. After installing UniTask, open Window -> Package Manager in Unity.
 2. Press the `+` button and choose **Add package from git URL...**
-3. Enter the following URL to install UAPI:
-```
-https://github.com/UModules/UAPI.gitupm
-```
+3. Enter `https://github.com/UModules/UAPI.gitupm` and press **Add**.
 
-**Option 2:** Install via Manifest File
-Alternatively, you can install `UAPI` by editing your `manifest.json` file located in the Packages folder of your Unity project.
-Add the following line to your dependencies:
-```
-"com.umodules.uapi": "https://github.com/UModules/UAPI.git#upm"
-```
+### Manifest File 📄
+To install via git URL by editing the `manifest.json`, add this entry:
+`"com.umodules.uapi": "https://github.com/UModules/UAPI.git#upm"`
 
-**Option 3:** Manual Installation
-1. Clone the UAPI repo or download the latest release from GitHub.
-2. Add the UAPI folder to your Unity project manually or import the .unitypackage file.
+### Unity Package 📦
+Alternatively, you can add the code directly to your project:
+1. Clone the repo or download the latest release.
+2. Add the UAPI Coroutine folder to your Unity project or import the `.unitypackage`.
 
-# Usage
-### Step 1: Create an `APIConfig` Scriptable Object
-1. In Unity, go to **Assets -> Create -> UAPIModule -> APIConfig** to create a new `APIConfig` Scriptable Object.
-2. Fill in the variables within the `APIConfig` asset in the Inspector, which include:
-    * **Base URL Configuration:** The base URL for the API.
-    * **Endpoint:** The specific endpoint of the API.
-    * **Method Type:** The HTTP method (GET, POST, etc.).
-    * **Headers:** Optional headers for the API request.
-    * **Needs Auth Header:** Whether authorization is required.
-    * **Timeout:** The timeout duration (in milliseconds).
-    * **Use Bearer Prefix:** Whether to use the 'Bearer' prefix in the authorization header.
-### Step 2: Create a Scene and Set Up the APITest Component
-1. Create a new Unity scene:
-    * In Unity, go to File -> New Scene and save the scene with a relevant name (e.g., "APITestScene").
-2. Create an empty GameObject:
-    * Right-click in the Hierarchy window and select Create Empty to create an empty GameObject.
-    * Name it something like "API Test Object."
-3. Create the `APITest` script:
-    * With the new GameObject selected, go to the Inspector window.
-    * Click **Add Component** and search for `APITest`. Attach this script to the empty GameObject.
-4. Serialize the APIConfig object:
-    * In the Inspector of the GameObject with the `APITest` script, you’ll see a field for the `APIConfig` object.
-    * Drag and drop the `APIConfig` asset you created earlier into this field to serialize it.
-### Step 3: Play the Project
-1. **Save the scene** if you haven’t already.
-2. Press Play in Unity to run the project.
-3. The `APITest` script will automatically execute and send a request based on the serialized `APIConfig`. You can monitor the console for any debug messages such as the API response or error messages.
+## Usage 📖
+### Sample Usage 🎮
+To see how UAPI Coroutine works, you can explore the sample provided:
+1. Open Unity and load the `Sample/Scenes/APISample.unity` scene.
+2. Run the sample to see how API requests are handled asynchronously using coroutines.
 
-## Sample Usage Code
+### Custom Request Function 🔧
+To demonstrate how to use UAPI Coroutine, here's a simple function that sends a request and handles the response:
 ```C#
-using UAPIModule.Assets;
-using UAPIModule.SharedTypes;
-using UAPIModule.Tools;
-using UnityEngine;
-
-namespace UAPIModule.Tests
+private void OnRequest()
 {
-    public class APITest : MonoBehaviour
-    {
-        private const string API_KEY = "TEST";
-
-        public APIConfig apiConfig;
-
-        private void Awake()
-        {
-            APIClient.CreateRequest(API_KEY, NetworkLoadingHandlerCreator.CreateAndGet());
-        }
-
-        private async void Start()
-        {
-            RequestFeedbackConfig feedbackConfig = RequestFeedbackConfig.InitializationFeedback;
-
-            NetworkResponse response = await APIClient.SendRequest(API_KEY, apiConfig.Get(), feedbackConfig, null);
-            if (response.isSuccessful)
-            {
-                Debug.Log(response.ToString());
-            }
-            else
-            {
-                Debug.LogError($"Request failed: {response.errorMessage}");
-            }
-        }
-    }
+   UniTask.Void(async () =>
+   {
+         var response = await APIClient.SendRequest(/*APIRequestConfig*/, /*RequestScreenConfig*/);
+         if (response.isSuccessful)
+         {
+            Debug.Log($"Response: {response.ToString()}");
+         }
+         else
+         {
+            Debug.LogError("Request failed: " + response.errorMessage);
+         }
+   });
 }
 ```
-
-# Documentation
-For detailed documentation, please refer to the [UAPI Documentation](https://github.com/UModules/UAPI/wiki).
+#### Key Classes and Configurations:
+- **`APIRequestConfig`:** Configuration for creating and managing API requests. This class is responsible for defining the key properties of an API request, including the URL, HTTP method, headers, request body, timeout, and optional authentication. It also provides methods to generate request configurations with or without an authentication token. The class ensures that all necessary fields, such as the access token when authentication is required, are properly validated before making the request. It also offers methods to determine whether a request has headers or a body.
+- **`RequestScreenConfig`:** Configuration for managing the display of network-related screens during API requests, including options for showing, hiding, or customizing screens based on the network state or response.
+- **`Response(NetworkResponse response)`:** The callback function that handles the API response. It checks whether the response is successful, and logs the result accordingly.
 
 # License
 This project is licensed under the MIT License. See the [LICENSE](https://github.com/UModules/UAPI/wiki/LICENSE) file for details.
