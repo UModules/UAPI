@@ -1,18 +1,30 @@
 {
   "name": "com.useffarahmand.uapi",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "displayName": "UAPI",
-  "description": "UAPIModule",
+  "description": "UAPI Module for networking and API operations in Unity, using UniTask for async operations.",
   "unity": "2022.3",
   "unityRelease": "0f1",
-  "author": { "name": "Usef Farahmand", "url": "https://github.com/UsefFarahmand" },
-  "dependencies": {
-    "com.unity.nuget.newtonsoft-json": "3.2.1"
+  "author": {
+    "name": "Usef Farahmand",
+    "email": "devkit@useffarahmand.com",
+    "url": "https://github.com/UsefFarahmand"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/UModules/UAPI.git"
   },
   "keywords": [
     "UAPI",
     "API",
     "Unity",
-    "Networking"
-  ]
+    "Networking",
+    "Async",
+    "UniTask",
+    "unitypackage"
+  ],
+  "dependencies": {
+    "com.unity.nuget.newtonsoft-json": "3.2.1"
+  }
 }
