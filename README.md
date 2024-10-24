@@ -62,4 +62,4 @@ private void OnRequest()
 - **`Response(NetworkResponse response)`:** The callback function that handles the API response. It checks whether the response is successful, and logs the result accordingly.
 
 # License
-This project is licensed under the MIT License. See the [LICENSE](https://github.com/UModules/UAPI-UniTask/wiki/LICENSE) file for details.
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/UModules/UAPI-UniTask/blob/main/LICENSE) file for details.
