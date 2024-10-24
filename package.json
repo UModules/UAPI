@@ -2,7 +2,7 @@
   "name": "com.useffarahmand.uapi-unitask",
   "version": "1.0.0",
   "displayName": "UAPI UniTask",
-  "description": "UAPI Module for networking and API operations in Unity, using UniTask for async operations.",
+  "description": "UAPI UniTask Module for networking and API operations in Unity, using UniTask for async operations.",
   "unity": "2022.3",
   "unityRelease": "0f1",
   "author": {
