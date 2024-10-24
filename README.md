@@ -1,4 +1,4 @@
-# UAPI 🚀
+# UAPI UniTask 🚀
 UAPI is a C# library developed by [Usef Farahmand](https://github.com/UsefFarahmand) aimed at simplifying API development and integration. It provides a set of tools and utilities to streamline the process of creating, managing, and consuming APIs, making it easier for developers to build robust and scalable applications.
 
 ✨ If you prefer using Unity's `Coroutine` system for asynchronous operations, we also offer a version of this package that integrates with Coroutines. You can find it [here](https://github.com/UModules/UAPI-Coroutine).
