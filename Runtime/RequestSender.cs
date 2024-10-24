@@ -1,29 +1,39 @@
-using Cysharp.Threading.Tasks;
-using Newtonsoft.Json;
 using System;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using UAPIModule.Abstraction;
 using UAPIModule.SharedTypes;
 using UAPIModule.Tools;
+using Unity.Plastic.Newtonsoft.Json;
 using UnityEngine;
+using Cysharp.Threading.Tasks;
 
 namespace UAPIModule
 {
-    internal class RequestSender
+    internal class RequestSender : MonoBehaviour
     {
-        protected static readonly HttpClient httpClient = new();
+        protected readonly HttpClient httpClient = new();
         internal readonly RequestLogger requestLogger = new();
-        protected readonly INetworkScreen loadingHandler;
 
-        public RequestSender(INetworkScreen loadingHandler)
+        private static RequestSender _instance;
+
+        public static RequestSender Instance
         {
-            this.loadingHandler = loadingHandler ?? throw new ArgumentNullException(nameof(loadingHandler));
+            get
+            {
+                if (_instance == null)
+                {
+                    var runnerObject = new GameObject("RequestSender");
+                    _instance = runnerObject.AddComponent<RequestSender>();
+                    DontDestroyOnLoad(runnerObject);
+                }
+                return _instance;
+            }
         }
 
-        public async UniTask<NetworkResponse<T>> SendRequest<T>(APIConfigData config, RequestFeedbackConfig feedbackConfig, RequestSendConfig sendConfig) where T : class
+        // SendRequest for non-generic type
+        public async UniTask<NetworkResponse> SendRequest(APIRequestConfig config, RequestScreenConfig screenConfig)
         {
             if (httpClient == null)
             {
@@ -34,35 +44,40 @@ namespace UAPIModule
 
             try
             {
-                var response = await SendRequestInternal(config, feedbackConfig, sendConfig, cancellationTokenSource.Token);
-                string responseBody = await response.Content.ReadAsStringAsync();
+                var response = await SendRequestInternalAsync(config, screenConfig, cancellationTokenSource.Token);
 
-                var networkResponse = new NetworkResponse<T>
+                if (response != null)
                 {
-                    isSuccessful = response.IsSuccessStatusCode,
-                    statusCode = (long)response.StatusCode,
-                    errorMessage = response.IsSuccessStatusCode ? null : response.ReasonPhrase,
-                    data = response.IsSuccessStatusCode ? JsonConvert.DeserializeObject<T>(responseBody) : null
-                };
+                    string responseBody = await response.Content.ReadAsStringAsync();
+                    var networkResponse = new NetworkResponse
+                    {
+                        isSuccessful = response.IsSuccessStatusCode,
+                        statusCode = (long)response.StatusCode,
+                        errorMessage = response.IsSuccessStatusCode ? null : response.ReasonPhrase
+                    };
 
-                if (!networkResponse.isSuccessful)
-                {
-                    networkResponse.errorMessage = responseBody;
+                    if (!networkResponse.isSuccessful)
+                    {
+                        networkResponse.errorMessage = responseBody;
+                    }
+
+                    requestLogger.LogResponse(networkResponse, config.URL);
+                    ShowResponseMessage(networkResponse, screenConfig);
+
+                    return networkResponse;
                 }
 
-                requestLogger.LogResponse(networkResponse, config.BaseURLConfig.BaseURL + config.Endpoint);
-                ShowResponseMessage(networkResponse);
-
-                return networkResponse;
+                return null; // In case of failure
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                HandleCustomError(e, config);
-                return null;
+                HandleCustomError(ex, config, screenConfig);
+                throw;
             }
         }
 
-        public async UniTask<NetworkResponse> SendRequest(APIConfigData config, RequestFeedbackConfig feedbackConfig, RequestSendConfig sendConfig)
+        // SendRequest for generic type
+        public async UniTask<NetworkResponse<K>> SendRequest<K>(APIRequestConfig config, RequestScreenConfig screenConfig) where K : class
         {
             if (httpClient == null)
             {
@@ -73,136 +88,116 @@ namespace UAPIModule
 
             try
             {
-                var response = await SendRequestInternal(config, feedbackConfig, sendConfig, cancellationTokenSource.Token);
-                string responseBody = await response.Content.ReadAsStringAsync();
+                var response = await SendRequestInternalAsync(config, screenConfig, cancellationTokenSource.Token);
 
-                var networkResponse = new NetworkResponse
+                if (response != null)
                 {
-                    isSuccessful = response.IsSuccessStatusCode,
-                    statusCode = (long)response.StatusCode,
-                    errorMessage = response.IsSuccessStatusCode ? null : response.ReasonPhrase,
-                };
+                    string responseBody = await response.Content.ReadAsStringAsync();
+                    var networkResponse = new NetworkResponse<K>
+                    {
+                        isSuccessful = response.IsSuccessStatusCode,
+                        statusCode = (long)response.StatusCode,
+                        errorMessage = response.IsSuccessStatusCode ? null : response.ReasonPhrase,
+                        data = response.IsSuccessStatusCode ? JsonConvert.DeserializeObject<K>(responseBody) : null
+                    };
 
-                if (!networkResponse.isSuccessful)
-                {
-                    networkResponse.errorMessage = responseBody;
+                    if (!networkResponse.isSuccessful)
+                    {
+                        networkResponse.errorMessage = responseBody;
+                    }
+
+                    requestLogger.LogResponse(networkResponse, config.URL);
+                    ShowResponseMessage(networkResponse, screenConfig);
+
+                    return networkResponse;
                 }
 
-                requestLogger.LogResponse(networkResponse, config.BaseURLConfig.BaseURL + config.Endpoint);
-                ShowResponseMessage(networkResponse);
-
-                return networkResponse;
+                return null; // In case of failure
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                HandleCustomError(e, config);
-                return null;
+                HandleCustomError(ex, config, screenConfig);
+                throw;
             }
         }
 
-        protected async UniTask<HttpResponseMessage> SendRequestInternal(APIConfigData config, RequestFeedbackConfig feedbackConfig, RequestSendConfig sendConfig, CancellationToken cancellationToken)
+        // Internal method for making the HTTP request
+        private async UniTask<HttpResponseMessage> SendRequestInternalAsync(APIRequestConfig config, RequestScreenConfig screenConfig, CancellationToken cancellationToken)
         {
-            string url = config.BaseURLConfig != null ? config.BaseURLConfig.BaseURL + config.Endpoint : config.Endpoint;
-            if (sendConfig.HasPathSuffix)
-            {
-                url = UrlUtility.Join(url, sendConfig.PathSuffix);
-            }
+            string url = config.URL;
 
-            HttpRequestMessage requestMessage = new HttpRequestMessage(new HttpMethod(config.MethodType.ToString()), url);
-            AddHeaders(requestMessage, config, sendConfig);
+            HttpRequestMessage requestMessage = new(new HttpMethod(config.MethodType.ToString()), url);
+            AddHeaders(requestMessage, config);
 
-            if ((config.MethodType == HTTPRequestMethod.POST || config.MethodType == HTTPRequestMethod.PUT) && sendConfig.HasBody())
+            if ((config.MethodType == HTTPRequestMethod.POST
+                || config.MethodType == HTTPRequestMethod.PUT
+                || config.MethodType == HTTPRequestMethod.PATCH) && config.HasBody)
             {
-                SetRequestBody(requestMessage, config, sendConfig);
+                SetRequestBody(requestMessage, config);
             }
 
             requestLogger.LogRequest(url);
-
-            if (feedbackConfig.ShowLoading)
-            {
-                loadingHandler?.ShowLoading();
-            }
+            screenConfig.TryShowScreen();
 
             try
             {
-                var response = await httpClient.SendAsync(requestMessage, cancellationToken);
+                HttpResponseMessage response = await httpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseContentRead, cancellationToken);
+                screenConfig.TryHideScreen();
                 return response;
             }
-            catch (TaskCanceledException)
+            catch (Exception ex)
             {
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    throw new TimeoutException("Request timed out");
-                }
+                HandleCustomError(ex, config, screenConfig);
                 throw;
-            }
-            finally
-            {
-                if (feedbackConfig.ShowLoading)
-                {
-                    loadingHandler?.HideLoading();
-                }
             }
         }
 
-        protected void AddHeaders(HttpRequestMessage requestMessage, APIConfigData config, RequestSendConfig sendConfig)
+        // Method for adding headers to the HTTP request
+        protected void AddHeaders(HttpRequestMessage requestMessage, APIRequestConfig config)
         {
-            if (config.Headers != null)
+            if (config.HeadersParameters != null)
             {
-                foreach (var header in config.Headers.Parameters)
+                foreach (var header in config.HeadersParameters)
                 {
-                    if (!header.key.Equals("Content-Type", StringComparison.OrdinalIgnoreCase))
+                    if (!header.Key.Equals("Content-Type", StringComparison.OrdinalIgnoreCase))
                     {
-                        requestMessage.Headers.Add(header.key, header.value);
+                        requestMessage.Headers.Add(header.Key, header.Value);
                     }
-                }
-            }
-
-            if (sendConfig.RequestHeaders != null)
-            {
-                foreach (var header in sendConfig.RequestHeaders)
-                {
-                    requestMessage.Headers.Add(header.Key, header.Value);
                 }
             }
 
             if (config.NeedsAuthHeader)
             {
-                string authToken = sendConfig.BearerToken ?? JwtTokenResolver.AccessToken;
+                string authToken = config.AccessToken;
                 if (string.IsNullOrEmpty(authToken))
                 {
                     Debug.LogError("Auth token is null or empty");
                     throw new InvalidOperationException("Auth token is null or empty");
                 }
-                var authHeaderValue = config.UseBearerPrefix ? $"Bearer {authToken}" : authToken;
-                requestMessage.Headers.Add(JwtTokenResolver.AUTHORIZATION_HEADER_KEY, authHeaderValue);
+                requestMessage.Headers.Add("Authorization", authToken);
             }
         }
 
-        protected void SetRequestBody(HttpRequestMessage requestMessage, APIConfigData config, RequestSendConfig sendConfig)
+        // Method for setting the request body
+        protected void SetRequestBody(HttpRequestMessage requestMessage, APIRequestConfig config)
         {
-            if (!string.IsNullOrEmpty(sendConfig.RequestBodyString))
-            {
-                requestMessage.Content = new StringContent(sendConfig.RequestBodyString);
-            }
-            else
-            {
-                requestMessage.Content = new StringContent(JsonConvert.SerializeObject(sendConfig.RequestBody));
-            }
+            requestMessage.Content = new StringContent(JsonConvert.SerializeObject(config.Bodies));
 
-            var contentTypeHeader = config.Headers.Parameters.FirstOrDefault(h => h.key.Equals("Content-Type", StringComparison.OrdinalIgnoreCase));
+            var contentTypeHeader = config.HeadersParameters.FirstOrDefault(h => h.Key.Equals("Content-Type", StringComparison.OrdinalIgnoreCase)).Value;
             if (contentTypeHeader != null)
             {
-                requestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(contentTypeHeader.value);
+                requestMessage.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(contentTypeHeader);
             }
         }
 
-        protected void ShowResponseMessage(NetworkResponse response)
+        // Method for showing response message on the screen
+        protected void ShowResponseMessage(NetworkResponse response, RequestScreenConfig screenConfig)
         {
-            loadingHandler?.ShowMessage(response);
+            screenConfig.TryShowMessage(response);
         }
 
-        protected void HandleCustomError(Exception exception, APIConfigData config)
+        // Custom error handler
+        protected void HandleCustomError(Exception exception, APIRequestConfig config, RequestScreenConfig screenConfig)
         {
             string errorMessage;
             long statusCode;
@@ -230,8 +225,8 @@ namespace UAPIModule
                 errorMessage = errorMessage
             };
 
-            requestLogger.LogResponse(errorResponse, config.BaseURLConfig.BaseURL + config.Endpoint);
-            ShowResponseMessage(errorResponse);
+            requestLogger.LogResponse(errorResponse, config.URL);
+            ShowResponseMessage(errorResponse, screenConfig);
         }
 
         private string GetErrorMessage(HttpRequestException e)
